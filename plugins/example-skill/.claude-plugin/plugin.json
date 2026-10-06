@@ -1,0 +1,12 @@
+{
+  "name": "example-skill",
+  "displayName": "Example Skill",
+  "version": "0.1.0",
+  "description": "Template plugin — rename and edit to ship a real IT4W skill",
+  "author": {
+    "name": "Hernando Farias",
+    "email": "hernando.farias@it4w.net"
+  },
+  "license": "UNLICENSED",
+  "skills": ["./skills/"]
+}

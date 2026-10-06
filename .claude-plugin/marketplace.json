@@ -1,0 +1,20 @@
+{
+  "name": "it4w",
+  "description": "IT4W internal Claude Code skills marketplace",
+  "owner": {
+    "name": "Hernando Farias",
+    "email": "hernando.farias@it4w.net"
+  },
+  "plugins": [
+    {
+      "name": "example-skill",
+      "source": "./plugins/example-skill",
+      "description": "Example plugin — copy this folder to add a new skill"
+    },
+    {
+      "name": "seguridad",
+      "source": "./plugins/seguridad",
+      "description": "Estándar de seguridad IT4W v1.2 (skill it4w-seguridad), agnóstico de stack"
+    }
+  ]
+}

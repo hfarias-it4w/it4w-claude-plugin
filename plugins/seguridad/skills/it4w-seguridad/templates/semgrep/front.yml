@@ -1,0 +1,40 @@
+rules:
+  - id: react-dangerously-set-inner-html-sin-sanitizar
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: dangerouslySetInnerHTML con contenido sin sanitizar (XSS). Usar DOMPurify.sanitize(...).
+    patterns:
+      - pattern: |
+          <$EL ... dangerouslySetInnerHTML={...} />
+      - pattern-not: |
+          <$EL ... dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(...) }} />
+
+  - id: js-asignacion-innerhtml
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: Asignación a innerHTML/outerHTML (XSS). Usar textContent o sanitizar.
+    patterns:
+      - pattern-either:
+          - pattern: $EL.innerHTML = $X
+          - pattern: $EL.outerHTML = $X
+      - pattern-not: $EL.innerHTML = DOMPurify.sanitize(...)
+
+  - id: js-eval-o-new-function
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: eval() / new Function() ejecutan código arbitrario. Evitarlo.
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+
+  - id: js-token-en-storage
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: Credencial o token en localStorage/sessionStorage. Usar cookie HttpOnly.
+    patterns:
+      - pattern-either:
+          - pattern: localStorage.setItem("$KEY", ...)
+          - pattern: sessionStorage.setItem("$KEY", ...)
+      - metavariable-regex:
+          metavariable: $KEY
+          regex: (?i).*(token|jwt|secret|password|passwd|credential).*

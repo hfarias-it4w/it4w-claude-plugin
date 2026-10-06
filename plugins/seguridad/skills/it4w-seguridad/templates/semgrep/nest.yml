@@ -1,0 +1,20 @@
+rules:
+  - id: nest-escritura-sin-roles
+    languages: [typescript]
+    severity: ERROR
+    message: Acción de escritura sin @Roles ni @Public. Declarar los roles autorizados.
+    patterns:
+      - pattern: |
+          @$VERB(...)
+          $METHOD(...) { ... }
+      - metavariable-regex:
+          metavariable: $VERB
+          regex: ^(Post|Put|Patch|Delete)$
+      - pattern-not: |
+          @Roles(...)
+          @$VERB(...)
+          $METHOD(...) { ... }
+      - pattern-not: |
+          @$VERB(...)
+          @Roles(...)
+          $METHOD(...) { ... }
