@@ -1,8 +1,8 @@
 {
   "name": "seguridad",
   "displayName": "Seguridad IT4W",
-  "version": "1.4.0",
-  "description": "Estándar de seguridad IT4W v1.4 como skill, aplicable a cualquier proyecto/stack",
+  "version": "1.5.0",
+  "description": "Estándar de seguridad IT4W v1.5 como skill, aplicable a cualquier proyecto/stack",
   "author": {
     "name": "Hernando Farias",
     "email": "hernando.farias@it4w.net"

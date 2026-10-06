@@ -1,0 +1,30 @@
+# Revisión de seguridad — AAAA-sprint-N
+
+Guardar como `security/revisiones/AAAA-sprint-N.md` (estándar IT4W §13.4).
+
+- **Proyecto / versión:**
+- **Fecha:**
+- **Revisor (no desarrolló lo revisado):**
+- **Ambiente probado:** (QA / local; nunca producción)
+- **Alcance** (endpoints, pantallas, integraciones tocadas en el sprint):
+
+## Casos probados
+
+| # | Área (§13.3) | Qué se probó | Resultado |
+|---|---|---|---|
+| 1 | Lógica de negocio / IDOR / Escalada de rol / Manipulación de requests / CORS-cookies-sesión / Archivos subidos | | |
+
+## Hallazgos
+
+| # | Descripción | Severidad (Critical/High/Medium/Low) | Responsable | Fecha límite (§8.3) | Estado |
+|---|---|---|---|---|---|
+
+## Excepciones solicitadas
+
+(enlace a la entrada de `security/exceptions.md`, con motivo, responsable y vencimiento)
+
+## Decisión
+
+- [ ] Puede salir a producción   - [ ] Bloqueada hasta corregir   - [ ] Sale con excepción registrada
+
+Criterio de bloqueo (§13.5): Critical o High frenan la salida a producción; Medium solo sale con excepción registrada y aprobada por el líder técnico; Low se corrige dentro del plazo.

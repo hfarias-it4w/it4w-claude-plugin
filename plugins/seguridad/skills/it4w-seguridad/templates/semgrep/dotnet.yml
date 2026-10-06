@@ -2,17 +2,27 @@ rules:
   - id: escritura-sin-authorize
     languages: [csharp]
     severity: ERROR
-    message: Acción de escritura sin [Authorize] ni política. Declarar autorización explícita.
+    message: Acción de escritura sin [Authorize] ni política. Declarar autorización explícita (o listarla como pública y justificarla).
     patterns:
-      - pattern: |
-          [$VERB]
-          public $RET $NAME(...) { ... }
+      - pattern-either:
+          - pattern: |
+              [$VERB]
+              public $RET $NAME(...) { ... }
+          - pattern: |
+              [$VERB(...)]
+              public $RET $NAME(...) { ... }
       - metavariable-regex:
           metavariable: $VERB
-          regex: Http(Post|Put|Patch|Delete).*
+          regex: ^Http(Post|Put|Patch|Delete)$
+      - pattern-not-inside: |
+          [Authorize]
+          class $C { ... }
       - pattern-not-inside: |
           [Authorize(...)]
           class $C { ... }
+      - pattern-not: |
+          [Authorize]
+          public $RET $NAME(...) { ... }
       - pattern-not: |
           [Authorize(...)]
           public $RET $NAME(...) { ... }

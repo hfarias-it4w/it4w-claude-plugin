@@ -14,7 +14,7 @@
     {
       "name": "seguridad",
       "source": "./plugins/seguridad",
-      "description": "Estándar de seguridad IT4W v1.4 (skill it4w-seguridad), agnóstico de stack"
+      "description": "Estándar de seguridad IT4W v1.5 (skill it4w-seguridad), agnóstico de stack"
     }
   ]
 }

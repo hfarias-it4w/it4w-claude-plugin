@@ -12,12 +12,14 @@ rules:
   - id: js-asignacion-innerhtml
     languages: [typescript, javascript]
     severity: ERROR
-    message: Asignación a innerHTML/outerHTML (XSS). Usar textContent o sanitizar.
+    message: Asignación a innerHTML/outerHTML (XSS). Usar textContent o sanitizar con DOMPurify. Vaciar con innerHTML = "" está permitido.
     patterns:
       - pattern-either:
           - pattern: $EL.innerHTML = $X
           - pattern: $EL.outerHTML = $X
       - pattern-not: $EL.innerHTML = DOMPurify.sanitize(...)
+      - pattern-not: $EL.innerHTML = ""
+      - pattern-not: $EL.innerHTML = ``
 
   - id: js-eval-o-new-function
     languages: [typescript, javascript]
@@ -33,8 +35,14 @@ rules:
     message: Credencial o token en localStorage/sessionStorage. Usar cookie HttpOnly.
     patterns:
       - pattern-either:
-          - pattern: localStorage.setItem("$KEY", ...)
-          - pattern: sessionStorage.setItem("$KEY", ...)
+          - pattern: localStorage.setItem($KEY, ...)
+          - pattern: sessionStorage.setItem($KEY, ...)
+          - pattern: window.localStorage.setItem($KEY, ...)
+          - pattern: window.sessionStorage.setItem($KEY, ...)
+          - pattern: localStorage[$KEY] = $V
+          - pattern: sessionStorage[$KEY] = $V
+          - pattern: localStorage.$KEY = $V
+          - pattern: sessionStorage.$KEY = $V
       - metavariable-regex:
           metavariable: $KEY
           regex: (?i).*(token|jwt|secret|password|passwd|credential).*
