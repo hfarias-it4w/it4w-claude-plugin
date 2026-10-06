@@ -1,9 +1,9 @@
 ---
 name: it4w-seguridad
-description: Estándar de seguridad IT4W v1.2 (deny by default, test de autorización de endpoints, SAST, SCA, secretos, contenedores, DAST, reglas de frontend, checklist de PR), aplicable a cualquier proyecto de IT4W sea cual sea el stack (.NET, NestJS/Node, Java/Spring, Python/FastAPI, frontends React/Angular/Vue). Usar SIEMPRE que se agregue o cambie un endpoint, ruta web, guard, permiso, rol, cookie, CORS, upload, dependencia, variable de entorno, workflow de CI o despliegue; al revisar un PR; al incorporar un proyecto nuevo; al preparar un pase a producción; o cuando aparezca cualquier hallazgo de seguridad.
+description: Estándar de seguridad IT4W v1.4 (deny by default, test de autorización de endpoints, SAST, SCA, secretos, contenedores, DAST, reglas de frontend, checklist de PR), aplicable a cualquier proyecto de IT4W sea cual sea el stack (.NET, NestJS/Node, Java/Spring, Python/FastAPI, frontends React/Angular/Vue). Usar SIEMPRE que se agregue o cambie un endpoint, ruta web, guard, permiso, rol, cookie, CORS, upload, dependencia, variable de entorno, workflow de CI o despliegue; al revisar un PR; al incorporar un proyecto nuevo; al preparar un pase a producción; o cuando aparezca cualquier hallazgo de seguridad.
 ---
 
-# Seguridad IT4W (estándar v1.2)
+# Seguridad IT4W (estándar v1.4)
 
 Fuente de verdad completa: el HTML del estándar que cada proyecto IT4W versiona en
 `docs/seguridad/estandar-it4w-v*.html` (al momento de escribir esta skill, la última conocida es
