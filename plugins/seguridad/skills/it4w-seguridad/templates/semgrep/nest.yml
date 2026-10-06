@@ -2,14 +2,20 @@ rules:
   - id: nest-escritura-sin-roles
     languages: [typescript]
     severity: ERROR
-    message: Acción de escritura sin @Roles ni @Public. Declarar los roles autorizados.
+    message: Acción de escritura sin @Roles (en el método o en la clase) ni @Public. Declarar los roles autorizados.
     patterns:
       - pattern: |
           @$VERB(...)
           $METHOD(...) { ... }
       - metavariable-regex:
           metavariable: $VERB
-          regex: ^(Post|Put|Patch|Delete)$
+          regex: ^(Post|Put|Patch|Delete|All)$
+      - pattern-not-inside: |
+          @Roles(...)
+          class $C { ... }
+      - pattern-not-inside: |
+          @Roles(...)
+          export class $C { ... }
       - pattern-not: |
           @Roles(...)
           @$VERB(...)
@@ -17,4 +23,12 @@ rules:
       - pattern-not: |
           @$VERB(...)
           @Roles(...)
+          $METHOD(...) { ... }
+      - pattern-not: |
+          @Public()
+          @$VERB(...)
+          $METHOD(...) { ... }
+      - pattern-not: |
+          @$VERB(...)
+          @Public()
           $METHOD(...) { ... }

@@ -1,0 +1,28 @@
+# Responsables de seguridad — <proyecto>
+
+Guardar como `security/responsables.md` o en el README del proyecto (estándar IT4W §12). Un rol sin nombre es una actividad sin dueño.
+
+## Quién ocupa cada rol
+
+| Rol | Nombre | Suplente |
+|---|---|---|
+| Desarrollador(es) | | |
+| Revisor de PR | | |
+| Líder técnico | | |
+| Revisor de seguridad (no desarrolló lo revisado) | | |
+| Contacto del cliente | | |
+| Dueño del IdP / portal (si los perfiles los define un tercero, §3.3) | | |
+
+## Quién hace cada actividad
+
+| Actividad | Quién la dispara | Quién revisa el resultado | Quién decide frenar la salida |
+|---|---|---|---|
+| Pipeline de seguridad en PR | Automático (branch policy) | Revisor de PR | Revisor de PR (no se permite el merge con checks fallidos) |
+| DAST en QA (§7) | Líder técnico, tras cada deploy a QA | Revisor de seguridad | Líder técnico, con el contacto del cliente si afecta una fecha |
+| Revisión manual por sprint (§13) | Líder técnico, al cierre del sprint | Líder técnico | Líder técnico |
+| Pentest externo (§13.7) | Líder técnico, con el contacto del cliente | Líder técnico y contacto del cliente | Contacto del cliente, con el líder técnico |
+| Reportes archivados (SARIF, TRX, DAST) | — | Revisor de seguridad, una vez por sprint | — |
+| Excepciones (`security/exceptions.md`, `.trivyignore`, `osv-scanner.toml`, `.gitleaksignore`) | — | Líder técnico: revisa las que vencen en los próximos 30 días, una vez por sprint | Líder técnico (renueva con motivo nuevo o exige corregir) |
+| Plazos de corrección (§8.3) | — | Líder técnico | Líder técnico |
+
+Estos dueños son una propuesta de partida; se ajustan por proyecto, sobre todo donde la infraestructura o los perfiles los gobierna el cliente.

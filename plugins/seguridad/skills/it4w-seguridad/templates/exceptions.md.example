@@ -1,0 +1,33 @@
+# Excepciones de seguridad — <proyecto>
+
+Registro único de las excepciones de seguridad vigentes (estándar IT4W §6.1, §8.2 y §13.5). Toda excepción lleva **motivo, responsable y fecha de vencimiento o de revisión**, se aprueba en el PR como cualquier cambio de seguridad y se revisa al menos una vez por sprint (§12). **Última actualización:** AAAA-MM-DD.
+
+---
+
+## 1. Dependencias (OSV-Scanner)
+
+Archivo: `osv-scanner.toml` (la excepción caduca sola en la fecha indicada: al vencer, el pipeline vuelve a fallar).
+
+| Aviso | Qué se acepta | Motivo | Responsable | Vence |
+|---|---|---|---|---|
+| `GHSA-xxxx-xxxx-xxxx` | `<paquete>` <versión>, dependencia transitiva de `<paquete padre>` | Por qué no aplica o no se puede corregir ahora | <nombre o equipo> | AAAA-MM-DD |
+
+## 2. Secretos (Gitleaks)
+
+Archivo: `.gitleaksignore` (por fingerprint `<commit>:<archivo>:<regla>:<línea>`). Gitleaks no admite fecha de vencimiento: estas excepciones **no caducan solas** y se revisan cada sprint.
+
+| Fingerprint (commit · archivo · línea) | Qué se acepta | Motivo | Responsable | Revisión |
+|---|---|---|---|---|
+| `<commit>…` · `<archivo>` · <línea> | Qué valor es | Por qué no es un secreto real (si lo fuera: **se rota**) | <nombre o equipo> | Cada sprint |
+
+## 3. Contenedores e IaC (Trivy)
+
+Archivo: `.trivyignore` (`<ID> exp:<AAAA-MM-DD>`, caduca sola).
+
+| ID | Qué se acepta | Motivo | Responsable | Vence |
+|---|---|---|---|---|
+| `DS-0002` | Dockerfile sin `USER` no root | Pendiente de corregir | <nombre o equipo> | AAAA-MM-DD |
+
+## 4. Reglas de código (Semgrep)
+
+Sin excepciones. (Si hubiera, listar la regla, el archivo, el motivo y el vencimiento.)
