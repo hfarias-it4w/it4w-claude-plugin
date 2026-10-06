@@ -1,0 +1,5 @@
+# osv-scanner.toml (en la raíz del repo). Formato verificado con OSV-Scanner 2.6.0
+[[IgnoredVulns]]
+id = "GHSA-xxxx-xxxx-xxxx"
+ignoreUntil = 2026-12-31
+reason = "Solo en dependencias de desarrollo, no llega al bundle. Responsable: <nombre>."

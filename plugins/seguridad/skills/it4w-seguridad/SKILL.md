@@ -5,12 +5,12 @@ description: Estándar de seguridad IT4W v1.2 (deny by default, test de autoriza
 
 # Seguridad IT4W (estándar v1.2)
 
-Fuente de verdad completa: `reference/estandar-it4w-v1.2.html` (IT4W v1.2, 2026-09-30, transversal
-a todos los proyectos de IT4W). Esta skill lo resume para aplicarlo en **cualquier stack**. Si algo
-acá contradice el HTML, manda el HTML — y si el proyecto tiene su propia copia en
-`docs/seguridad/estandar-it4w-v1.2.html`, esa es la vigente para ese repo (puede haber avanzado de
-versión). El estándar es un **mínimo**: un repo puede ser más estricto en varios puntos y eso se
-conserva.
+Fuente de verdad completa: el HTML del estándar que cada proyecto IT4W versiona en
+`docs/seguridad/estandar-it4w-v*.html` (al momento de escribir esta skill, la última conocida es
+v1.4, 2026-09-30). Esta skill no incluye una copia del HTML — resume el estándar para aplicarlo en
+**cualquier stack**. Si algo acá contradice el HTML del proyecto, manda el HTML (puede haber
+avanzado de versión desde que se escribió esta skill). El estándar es un **mínimo**: un repo puede
+ser más estricto en varios puntos y eso se conserva.
 
 ## Principios (§1)
 
@@ -44,7 +44,7 @@ modificable solo vía PR con revisión. Formato: array de `"MÉTODO /ruta"`:
 | §3.2 Reglas de código | pertenencia desde la sesión, no del body; CSRF con cookies; CORS explícito; rate limit; sin stack traces | guards/middleware + `ValidationPipe`/filtros del framework |
 | §4 Test de autorización | enumera endpoints reales; matriz sin credenciales / solo lectura / con permiso; manifiestos en ambos sentidos; prueba de mutación; etapa propia del pipeline | `test/security/` o equivalente, script dedicado (`test:security`) |
 | §5 SAST | Semgrep con reglas propias (base gratis recomendada), bloqueante, SARIF | `security/semgrep/*.yml` — ver `templates/semgrep/` de esta skill |
-| §6 SCA, secretos, contenedores | audit nativo del stack + Gitleaks (historial incluido) + Trivy (imagen y config); bloqueantes en High/Critical | job de CI dedicado |
+| §6 SCA, secretos, contenedores | audit nativo del stack + **Trivy** (`config`/`fs`/`image`, obligatorio si hay Dockerfile) + **OSV-Scanner** (segunda fuente de dependencias) + Gitleaks (historial incluido); bloqueantes en High/Critical | job de CI dedicado, versiones de los binarios fijadas (no `latest`) |
 | §7 DAST | ZAP baseline + API scan + Schemathesis/Newman contra **QA**, nunca prod; bloquea promoción | post-deploy a QA, nunca en cada PR |
 | §8 Pipeline y ramas | etapas bloqueantes, reportes como artefactos, PR + 1 revisor, `security/exceptions.md` para excepciones | `.github/workflows/` o Azure Pipelines; CODEOWNERS; branch protection |
 | §9 Front | lockfile + install reproducible, sin `.env` versionados, sin tokens en storage, sin HTML sin sanitizar, CSP/headers, sin source maps, sin CDN sin SRI | `security/semgrep/front.yml`, nginx/Caddy con CSP |
@@ -69,7 +69,7 @@ montadas antes, desde una lista explícita.
 **FastAPI:** dependencia global de autenticación.
 
 Código completo de cada patrón (incluye el guard de NestJS que falla cerrado en escritura y el test
-de mutación que lo prueba): §3.1 y §4.3/§4.4 del HTML en `reference/`.
+de mutación que lo prueba): §3.1 y §4.3/§4.4 del HTML del estándar del proyecto.
 
 ## Qué hacer en cada situación
 
@@ -122,9 +122,24 @@ de mutación que lo prueba): §3.1 y §4.3/§4.4 del HTML en `reference/`.
 - Instalación reproducible en CI/Docker (`npm ci`, `--frozen-lockfile`, `dotnet restore` con
   lockfile); el lockfile se versiona siempre.
 - Audit nativo del stack sin High/Critical antes de mergear (`npm audit --audit-level=high`,
-  `dotnet list package --vulnerable --include-transitive`, o Snyk/OWASP Dependency-Check/OSV-Scanner
-  como alternativa multi-stack). Un hallazgo que no se puede corregir ya → fila en
-  `security/exceptions.md` con responsable y vencimiento.
+  `dotnet list package --vulnerable --include-transitive`). **Se suma, no reemplaza**, a Trivy y
+  OSV-Scanner (§6.1): cada fuente de avisos tiene cobertura y tiempos de actualización distintos.
+- **Trivy** (gratis, Apache 2.0, sin servidor): `trivy config` sobre Dockerfile/IaC,
+  `trivy fs --scanners vuln,secret` sobre el árbol de dependencias, `trivy image` sobre la imagen ya
+  construida. **Obligatorio si el proyecto tiene Dockerfile** — ningún backend desplegado en
+  contenedor queda sin esto.
+- **OSV-Scanner** (gratis, Google, base osv.dev): `osv-scanner scan source -r .` como segunda fuente
+  de avisos de dependencias (especialmente útil en Node/npm). En .NET lee `.csproj`/
+  `packages.lock.json`, pero no reemplaza `dotnet list package --vulnerable --include-transitive`
+  para transitivas. Sale con código de error ante **cualquier** hallazgo (no filtra por severidad),
+  por eso las excepciones van en `osv-scanner.toml`, no en un umbral.
+- Fijar la **versión exacta** de cada binario de seguridad en el pipeline (Trivy, OSV-Scanner,
+  Gitleaks) — nunca `latest`; un cambio de versión no debe alterar el resultado de un PR sin que
+  nadie lo decida.
+- Un hallazgo que no se puede corregir ya → excepción con **motivo, responsable y fecha de
+  vencimiento** que caduca sola: `.trivyignore` (`<ID> exp:<AAAA-MM-DD>`), `osv-scanner.toml`
+  (`[[IgnoredVulns]]` con `ignoreUntil`), o fila en `security/exceptions.md`. Plantillas en
+  `templates/` de esta skill.
 - Majors de framework solo con la suite completa verde y CI activo.
 
 ### Secretos y entornos
@@ -160,6 +175,10 @@ en local; **nunca explotar contra QA o prod**. Si no se corrige en el mismo PR:
 - [ ] El test de autorización pasa y cubre el endpoint nuevo.
 - [ ] Sin secretos ni credenciales en el diff.
 - [ ] Sin dependencias nuevas con vulnerabilidades High/Critical.
+- [ ] Si el proyecto tiene Dockerfile: sin hallazgos High/Critical de Trivy (usuario no root, sin
+      secretos embebidos, imagen base actualizada).
+- [ ] Toda excepción nueva (`.trivyignore`, `osv-scanner.toml`, `.gitleaksignore`) lleva motivo,
+      responsable y fecha de revisión.
 - [ ] Cambios en auth/roles/CORS/cookies revisados por otra persona.
 - [ ] Front: sin HTML sin sanitizar, sin tokens en storage, sin claves en variables de entorno del
       frontend, sin `.env` versionados, lockfile al día.
@@ -172,12 +191,18 @@ en local; **nunca explotar contra QA o prod**. Si no se corrige en el mismo PR:
 3. Adaptar el test de inventario de endpoints (§4) y etiquetarlo/nombrarlo para correr como etapa
    propia del pipeline (`test:security` o equivalente).
 4. Agregar el pipeline de seguridad: build → test de autorización (bloqueante) → SAST (bloqueante) →
-   SCA + secretos (bloqueante en High/Critical) → build de imagen + Trivy (bloqueante) → publicar
-   reportes. DAST contra QA después del deploy, nunca en cada PR.
-5. Configurar la política de ramas con ese pipeline como check requerido.
+   SCA nativa del stack + OSV-Scanner + secretos (bloqueante en High/Critical) → Trivy (`config`/
+   `fs`/`image` si hay Dockerfile, bloqueante) → publicar reportes. DAST contra QA después del
+   deploy, nunca en cada PR. Correr en las ramas de integración del proyecto (`main`, `QA`,
+   `develop` si existe) y fijar la imagen del agente (ej. `ubuntu-24.04`, no `latest`).
+5. Configurar la política de ramas con ese pipeline como check requerido (en Azure Repos Git,
+   registrarlo además como *Build validation* — el bloque `pr:` del YAML no alcanza ahí).
 6. Documentar en el README del proyecto: roles, políticas y endpoints públicos.
 7. Coordinar con el cliente/infra el ambiente para DAST y la frecuencia del pentest.
-8. Copiar `reference/estandar-it4w-v1.2.html` a `docs/seguridad/` del proyecto como fuente de verdad local.
+8. Conseguir la última versión del HTML del estándar (con el responsable de seguridad de IT4W) y
+   versionarla en `docs/seguridad/` del proyecto como fuente de verdad local.
+9. Sumar Trivy y OSV-Scanner al pipeline fijando la versión de cada binario, y registrar las
+   excepciones iniciales con motivo, responsable y fecha (`.trivyignore`/`osv-scanner.toml`).
 
 ## Comandos de verificación (genéricos — adaptar nombres al proyecto)
 
@@ -187,8 +212,10 @@ semgrep scan --config security/semgrep --error --sarif -o semgrep.sarif   # SAST
 npm audit --audit-level=high                                       # SCA (Node) — o equivalente del stack
 dotnet list package --vulnerable --include-transitive               # SCA (.NET)
 gitleaks detect --redact --exit-code 1                              # secretos (con --source . e historial)
-trivy image --severity HIGH,CRITICAL --exit-code 1 <imagen>          # contenedores
-trivy config .                                                      # IaC
+osv-scanner scan source -r .                                        # SCA, segunda fuente (excepciones: osv-scanner.toml)
+trivy config --severity HIGH,CRITICAL --exit-code 1 .                # Dockerfile / IaC
+trivy fs --scanners vuln,secret --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed .  # dependencias
+trivy image --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed <imagen>  # imagen construida
 zap-baseline.py -t https://qa.ejemplo/                               # DAST pasivo, post-deploy a QA
 schemathesis run openapi.json --url https://qa.ejemplo               # DAST activo por contrato
 ```
@@ -209,9 +236,12 @@ create/update/delete no se puedan ejecutar sin permiso.
 - `templates/semgrep/front.yml` — reglas de frontend (XSS por `dangerouslySetInnerHTML`/`innerHTML`,
   `eval`/`new Function`, token en `localStorage`/`sessionStorage`).
 - `templates/public-endpoints.json.example` — formato del manifiesto de endpoints públicos.
+- `templates/trivyignore.example` — formato de `.trivyignore` (excepciones con vencimiento).
+- `templates/osv-scanner.toml.example` — formato de `osv-scanner.toml` (excepciones con vencimiento).
 
-Copiarlas a `security/semgrep/` y `security/` del proyecto y ajustar nombres/paths; son punto de
-partida, no sustituto del test de autorización (§4), que sigue siendo el control autoritativo.
+Copiarlas a `security/semgrep/` o a la raíz del proyecto (`.trivyignore`, `osv-scanner.toml`) según
+corresponda y ajustar nombres/paths; son punto de partida, no sustituto del test de autorización
+(§4), que sigue siendo el control autoritativo.
 
 ## Limitaciones (§13)
 

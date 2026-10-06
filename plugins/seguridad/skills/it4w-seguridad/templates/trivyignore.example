@@ -1,0 +1,4 @@
+# .trivyignore (en la raíz del repo). Formato: <ID> exp:<AAAA-MM-DD>
+# Sirve para CVE y para reglas de mala configuración (ej. DS-0002 = Dockerfile sin USER no root).
+# DS-0002: el Dockerfile corre como root; pendiente de corregir. Responsable: <nombre>.
+DS-0002 exp:2026-10-31
